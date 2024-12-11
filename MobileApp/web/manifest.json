@@ -1,11 +1,11 @@
 {
-    "name": "mob_control",
-    "short_name": "mob_control",
+    "name": "remote_control",
+    "short_name": "remote_control",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Fyp Project",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

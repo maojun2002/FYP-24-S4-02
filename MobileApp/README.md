@@ -1,6 +1,6 @@
-# mob_control
+# remote_control
 
-Fyp Project
+A new Flutter project.
 
 ## Getting Started
 
