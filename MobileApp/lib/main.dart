@@ -144,7 +144,7 @@ class _RootPageState extends State<RootPage> with TickerProviderStateMixin  {
                 color: Colors.purple,
                 shadows: [
                   Shadow(
-                    offset: Offset(3.0, 3.0),
+                    offset: const Offset(3.0, 3.0),
                     blurRadius: 4.0,
                     color: Colors.purple.withOpacity(0.7),
                   ),
@@ -170,7 +170,7 @@ class _RootPageState extends State<RootPage> with TickerProviderStateMixin  {
                     color: Colors.white,
                     shadows: [
                       Shadow(
-                        offset: Offset(1.0, 1.0),
+                        offset: const Offset(1.0, 1.0),
                         blurRadius: 2.0,
                         color: Colors.black.withOpacity(0.5),
                       ),
