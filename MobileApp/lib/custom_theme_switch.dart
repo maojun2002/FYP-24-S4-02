@@ -30,10 +30,10 @@ class CustomThemeSwitch extends StatefulWidget {
   });
 
   @override
-  _CustomThemeSwitchState createState() => _CustomThemeSwitchState();
+  CustomThemeSwitchState createState() => CustomThemeSwitchState();
 }
 
-class _CustomThemeSwitchState extends State<CustomThemeSwitch>
+class CustomThemeSwitchState extends State<CustomThemeSwitch>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -60,11 +60,12 @@ class _CustomThemeSwitchState extends State<CustomThemeSwitch>
   @override
   void didUpdateWidget(CustomThemeSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If `isOn` changes, run the animation forward or backward.
     if (oldWidget.isOn != widget.isOn) {
+      debugPrint("CustomThemeSwitch updated: isOn = ${widget.isOn}");
       widget.isOn ? _controller.forward() : _controller.reverse();
     }
   }
+
 
   @override
   void dispose() {
@@ -76,24 +77,29 @@ class _CustomThemeSwitchState extends State<CustomThemeSwitch>
   // BUILDING THE SWITCH UI ---------------------------------------------------
   @override
   Widget build(BuildContext context) {
-    // Interpolate (blend) between the light and dark colors based on _animation's value
-    Color backgroundColor = Color.lerp(widget.lightBackgroundColor,
-        widget.darkBackgroundColor, _animation.value)!;
-    Color iconColor = Color.lerp(
-        widget.lightIconColor, widget.darkIconColor, _animation.value)!;
-    
     return GestureDetector(
-      // When tapped, call the onToggle function provided by the parent.
       onTap: widget.onToggle,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (context, child) {
+          // Blend background colors based on the animation value
+          final backgroundColor = Color.lerp(
+            widget.lightBackgroundColor,
+            widget.darkBackgroundColor,
+            _animation.value,
+          )!;
+
+          final iconColor = Color.lerp(
+            widget.lightIconColor,
+            widget.darkIconColor,
+            _animation.value,
+          )!;
+
           return Container(
             width: 80,
             height: 40,
-            // Rounded rectangle shape for the switch background
             decoration: BoxDecoration(
-              color: backgroundColor,
+              color: backgroundColor, // Only depend on animation
               borderRadius: BorderRadius.circular(20),
               boxShadow: const [
                 BoxShadow(
@@ -103,9 +109,9 @@ class _CustomThemeSwitchState extends State<CustomThemeSwitch>
                 ),
               ],
             ),
+            
             child: Stack(
               children: [
-                // The sliding "handle" that moves left/right based on `isOn`
                 AnimatedAlign(
                   duration: widget.duration,
                   alignment: widget.isOn
@@ -114,29 +120,18 @@ class _CustomThemeSwitchState extends State<CustomThemeSwitch>
                   curve: Curves.easeInOut,
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
-                     child: Stack(
-                        alignment: Alignment.center, // Center the icon inside the circle
-                        // The handle: a circle that changes color
-                        children: [
-                            // The circle handle with BoxDecoration
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: iconColor, // The handle’s color blends between light/dark
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            
-                            // The dynamic icon on top of the handle
-                            Container(
-                            child: widget.isOn
-                              ? (widget.iconDark ??
-                                  Icon(Icons.nights_stay, color: widget.darkIconColor))
-                              : (widget.iconLight ??
-                                  Icon(Icons.wb_sunny, color: widget.lightIconColor))
-                            ),
-                        ],
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: iconColor, // Ensure handle color blends smoothly
+                        shape: BoxShape.circle,
+                      ),
+                      child: widget.isOn
+                          ? widget.iconDark ??
+                              Icon(Icons.nights_stay, color: widget.darkIconColor)
+                          : widget.iconLight ??
+                              Icon(Icons.wb_sunny, color: widget.lightIconColor),
                     ),
                   ),
                 ),

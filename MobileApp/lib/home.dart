@@ -215,9 +215,9 @@ class _HomeState extends State<Home> {
                         color: _isDark ? Colors.white : Colors.black,
                       ),
                     ),
-                    CustomThemeSwitch(
-                      isOn: _isDark,
-                      onToggle: () => setState(() => _isDark = !_isDark),  
+                    _ThemeSwitcher(
+                      isDark: _isDark,
+                      onToggle: () => setState(() => _isDark = !_isDark),
                     ),
                   ],
                 ),
@@ -342,3 +342,47 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+
+class _ThemeSwitcher extends StatefulWidget {
+  final bool isDark;
+  final VoidCallback onToggle;
+
+  const _ThemeSwitcher({required this.isDark, required this.onToggle});
+
+  @override
+  State<_ThemeSwitcher> createState() => _ThemeSwitcherState();
+}
+
+class _ThemeSwitcherState extends State<_ThemeSwitcher> {
+  final GlobalKey _switchKey = GlobalKey(); // Preserve state with GlobalKey
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: _switchKey,
+      width: 80,
+      height: 40,
+      child: CustomThemeSwitch(
+        // Determines the current state (light/dark mode).
+        isOn: widget.isDark,
+
+        // Triggers the toggle callback when tapped.
+        onToggle: widget.onToggle,
+
+        // Define the icon for light mode (e.g., sunny icon).
+        iconLight: const Icon(Icons.wb_sunny, color: Color(0xFFF5DD02)),
+
+        // Define the icon for dark mode (e.g., moon icon).
+        iconDark: const Icon(Icons.nights_stay, color: Color(0xFF3781A5)),
+
+        // Background color for light mode.
+        lightBackgroundColor: Colors.white,
+
+        // Background color for dark mode.
+        darkBackgroundColor: Colors.black,
+      ),
+    );
+  }
+}
+
