@@ -23,7 +23,18 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _checkBluetoothState();
+    _initializeTheme();
   }
+
+  void _initializeTheme() {
+    final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _isDark = brightness == Brightness.dark;
+      });
+    });
+  }
+
   // Check Bluetooth State
   Future<void> _checkBluetoothState() async {
     // get the current bluetooth status
@@ -206,7 +217,7 @@ class _HomeState extends State<Home> {
                     ),
                     CustomThemeSwitch(
                       isOn: _isDark,
-                      onToggle: () => setState(() => _isDark = !_isDark),
+                      onToggle: () => setState(() => _isDark = !_isDark),  
                     ),
                   ],
                 ),

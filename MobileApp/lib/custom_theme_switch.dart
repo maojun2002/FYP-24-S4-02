@@ -55,6 +55,7 @@ class _CustomThemeSwitchState extends State<CustomThemeSwitch>
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
+
   // Update the animation if the parent widget changes the `isOn` value.
   @override
   void didUpdateWidget(CustomThemeSwitch oldWidget) {
