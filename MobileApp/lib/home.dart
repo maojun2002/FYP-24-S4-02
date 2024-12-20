@@ -4,6 +4,8 @@ import 'package:app_settings/app_settings.dart';
 import 'controller.dart';
 import 'qr_scan_page.dart';
 import 'custom_theme_switch.dart';
+import 'OTPGenerator.dart';
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -116,45 +118,63 @@ class _HomeState extends State<Home> {
 
   // show otp pin dialog
   Future<void> _showOTPPinDialog() async {
-    String pinCode = '';
-    showDialog(
+    final otpGenerator = OTPGenerator();
+
+    // Show dialog
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter 6-Digit PIN'),
-          content: TextField(
-            maxLength: 6,
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              pinCode = value;
-            },
-            decoration: const InputDecoration(
-              hintText: 'Enter PIN',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Entered PIN: $pinCode')),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return StreamBuilder<String>(
+              stream: otpGenerator.otpStream,
+              builder: (context, otpSnapshot) {
+                return StreamBuilder<int>(
+                  stream: otpGenerator.countdownStream,
+                  builder: (context, countdownSnapshot) {
+                    return AlertDialog(
+                      title: const Text('Generated OTP'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Your OTP is: ${otpSnapshot.data ?? 'Loading...'}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Expires in: ${countdownSnapshot.data ?? 60} seconds',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            otpGenerator.dispose(); // Cleanup resources
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
-              child: const Text('Pair'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
-  }
 
-  
+    otpGenerator.dispose(); // Cleanup resources when dialog is dismissed
+  }
 
 
   @override

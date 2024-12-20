@@ -40,6 +40,9 @@ dependencies:
   app_settings: ^5.1.1
   flutter_joystick: ^0.2.1
   sensors_plus: ^6.1.0 # 添加 sensors_plus 包
+  http: ^1.2.2
+  device_info_plus: ^11.2.0 #
+  intl: ^0.20.1 # get current time zone in phone app
 
 dev_dependencies:
   flutter_test:
