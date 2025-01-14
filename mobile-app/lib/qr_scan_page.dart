@@ -113,7 +113,7 @@ class _QRScanPageState extends State<QRScanPage> {
         message = "Connecting to Bluetooth device...";
       });
 
-      bool isConnected = await bluetoothManager.connectAndSendOtp(bluetoothAddress, otp);
+      bool isConnected = await bluetoothManager.connectToDevice(bluetoothAddress, otp);
 
       setState(() {
         message = isConnected
