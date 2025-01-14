@@ -4,7 +4,7 @@ import 'package:app_settings/app_settings.dart';
 import 'controller.dart';
 import 'qr_scan_page.dart';
 import 'custom_theme_switch.dart';
-import 'OTPGenerator.dart';
+import 'OTP_Generator.dart';
 
 
 class Home extends StatefulWidget {

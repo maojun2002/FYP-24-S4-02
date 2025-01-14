@@ -10,7 +10,7 @@ class QRScanPage extends StatefulWidget {
   State<QRScanPage> createState() => _QRScanPageState();
 }
 
-final BluetoothManager bluetoothManager = BluetoothManager(); // 创建 BluetoothManager 实例
+final BluetoothManager bluetoothManager = BluetoothManager();
 
 class _QRScanPageState extends State<QRScanPage> {
   String? result; // Holds the result of the QR code scan
@@ -30,32 +30,26 @@ class _QRScanPageState extends State<QRScanPage> {
               for (final barcode in barcodes) {
                 final qrValue = barcode.rawValue;
                 if (qrValue != null) {
-                  setState(() {
-                    result = qrValue;
-                    message = "QR Code scanned successfully! Connecting to device...";
-                  });
-
-                  // Parse QR data and initiate Bluetooth connection
                   final parsedData = _parseQRCodeData(qrValue);
                   if (parsedData != null) {
-                    final bluetoothAddress = parsedData['bluetoothAddress'];
-                    final otp = parsedData['otp'];
-                    if (bluetoothAddress != null && otp != null) {
-                      // call BluetoothManager to build connection
-                      bluetoothManager.connectToDevice(bluetoothAddress, otp);
-                    } else {
-                      setState(() {
-                        message = "Invalid QR data: Missing Bluetooth info.";
-                      });
-                    }
-                  }
+                      final bluetoothAddress = parsedData['bluetoothAddress'];
+                      final serviceUUID = parsedData['serviceUUID'];
+                      final otp = parsedData['otp'];
+                      final playerId = parsedData['playerId']; // Retrieve playerId
 
-                  Navigator.pop(context, qrValue);
-                  break; // Exit loop after processing one barcode
+                      // Attempt Bluetooth connection
+                      _connectToBluetooth(bluetoothAddress, otp);
+                  } else {
+                    setState(() {
+                      message = "Invalid QR Code data.";
+                    });
+                  }
+                  break;
                 }
               }
             },
           ),
+
           // Overlay with transparent area for scanning
           _buildScannerOverlay(context),
           // Instructions and icons displayed above the scan box
@@ -118,13 +112,17 @@ class _QRScanPageState extends State<QRScanPage> {
       setState(() {
         message = "Connecting to Bluetooth device...";
       });
-      await bluetoothManager.connectToDevice(bluetoothAddress, otp);
+
+      bool isConnected = await bluetoothManager.connectToDevice(bluetoothAddress, otp);
+
       setState(() {
-        message = "Connected and OTP verified successfully!";
+        message = isConnected
+            ? "Connected and OTP verified successfully!"
+            : "Failed to verify OTP.";
       });
     } catch (e) {
       setState(() {
-        message = "Failed to connect: $e";
+        message = "Connection failed: $e";
       });
     }
   }
