@@ -1,70 +1,58 @@
+// Updated BluetoothManager.dart (phone)
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'dart:async';
+import 'dart:convert';
 
 class BluetoothManager {
-  final FlutterBluePlus flutterBlue = FlutterBluePlus();
 
-  // Method to connect to a Bluetooth device
-  Future<void> connectToDevice(String bluetoothAddress, String otp) async {
+  Future<bool> connectAndSendOtp(String bluetoothAddress, String otp) async {
     try {
-      // Start scanning for devices
-      FlutterBluePlus.startScan(timeout: const Duration(seconds: 5));
+      print("Attempting to connect to Bluetooth device: $bluetoothAddress");
 
-      // Listen to scan results
-      FlutterBluePlus.scanResults.listen((results) async {
-        for (ScanResult r in results) {
-          print('Device found: ${r.device.name} (${r.device.id})');
+      // 扫描并找到目标设备
+      await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
+      BluetoothDevice? targetDevice;
 
-          // Check if the device address matches
-          if (r.device.id.toString() == bluetoothAddress) {
-            print("Connecting to device...");
-            await r.device.connect();
-            FlutterBluePlus.stopScan(); // Stop scanning after connecting
-            print("Connected to device: ${r.device.name}");
-
-            // Verify OTP or perform pairing logic here
-            if (await verifyOTP(r.device, otp)) {
-              print("Verification successful!");
-            } else {
-              print("Verification failed!");
-              await r.device.disconnect();
-            }
+      await for (final results in FlutterBluePlus.scanResults) {
+        for (final result in results) {
+          if (result.device.id.id == bluetoothAddress) {
+            targetDevice = result.device;
+            break;
           }
         }
-      });
-    } catch (e) {
-      print("Error during Bluetooth connection: $e");
-    }
-  }
+        if (targetDevice != null) break;
+      }
 
-  // OTP verification method
-  Future<bool> verifyOTP(BluetoothDevice device, String otp) async {
-    try {
-      print("Sending OTP for verification...");
+      if (targetDevice == null) {
+        print("Device not found.");
+        return false;
+      }
 
-      // Discover services on the device
-      List<BluetoothService> services = await device.discoverServices();
+      FlutterBluePlus.stopScan(); // 停止扫描
 
+      // 连接设备
+      await targetDevice.connect();
+      print("Connected to device: ${targetDevice.name}");
+
+      // 发现服务
+      List<BluetoothService> services = await targetDevice.discoverServices();
       for (BluetoothService service in services) {
         for (BluetoothCharacteristic characteristic in service.characteristics) {
-          // Assume the characteristic UUID matches the expected one for OTP verification
-          if (characteristic.uuid.toString() == "0000xxxx-0000-1000-8000-00805f9b34fb") { // Replace with the actual UUID
-            // Write the OTP to the characteristic
-            await characteristic.write(otp.codeUnits, withoutResponse: true);
-
-            // Read the response
-            final response = await characteristic.read();
-            final responseString = String.fromCharCodes(response);
-            print("OTP Verification Response: $responseString");
-
-            return responseString == "VERIFIED"; // Adjust based on the expected response
+          if (characteristic.properties.write) {
+            print("Found writable characteristic: ${characteristic.uuid}");
+            await characteristic.write(utf8.encode(otp), withoutResponse: true);
+            print("OTP sent successfully.");
+            return true; // 成功发送 OTP
           }
         }
       }
 
-      return false; // Return false if no matching characteristic is found
+      print("No writable characteristic found.");
+      return false; // 未找到可写入的特征值
     } catch (e) {
-      print("Error during OTP verification: $e");
-      return false;
+      print("Error during Bluetooth connection: $e");
+      return false; // 连接失败
     }
   }
 }
+
