@@ -120,10 +120,10 @@ class _HomeState extends State<Home> {
   Future<void> _showOTPPinDialog() async {
     final otpGenerator = OTPGenerator();
 
-    // Show dialog
     await showDialog(
       context: context,
       builder: (BuildContext context) {
+
         return StatefulBuilder(
           builder: (context, setState) {
             return StreamBuilder<String>(
@@ -132,35 +132,118 @@ class _HomeState extends State<Home> {
                 return StreamBuilder<int>(
                   stream: otpGenerator.countdownStream,
                   builder: (context, countdownSnapshot) {
+                    final int remainingTime = countdownSnapshot.data ?? 60;
+                    final String otp = otpSnapshot.data ?? 'Loading...';
+
                     return AlertDialog(
-                      title: const Text('Generated OTP'),
+
+                      //Changing background color base on theme
+                      backgroundColor:
+                      _isDark ? Colors.black : Colors.white, // Dynamic background
+                      titleTextStyle: TextStyle(
+                        color: _isDark ? Colors.white : Colors.black, // Title text color
+                        fontWeight: FontWeight.bold,
+                      ),
+                      contentTextStyle: TextStyle(
+                        color: _isDark ? Colors.white70 : Colors.black87, // Content text color
+                      ),
+
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Your OTP is: ${otpSnapshot.data ?? 'Loading...'}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                          // Top Divider
+                          Divider(
+                            thickness: 1.5,
+                            color: _isDark ? Colors.white38 : Colors.black54,
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Expires in: ${countdownSnapshot.data ?? 60} seconds',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontStyle: FontStyle.italic,
-                            ),
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              // Circular countdown timer
+                              SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      value: remainingTime / 60,
+                                      strokeWidth: 8,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(
+                                        Color.fromARGB(255, 218, 90, 235),
+                                      ),
+                                      backgroundColor: _isDark
+                                          ? Colors.white24
+                                          : Colors.grey[300],
+                                    ),
+                                    Center(
+                                      child: Text(
+                                        '$remainingTime',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: _isDark
+                                              ? Colors.white
+                                              : Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // OTP Display
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Your OTP is:',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: _isDark
+                                            ? Colors.white70
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      otp,
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: _isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // Bottom Divider
+                          Divider(
+                            thickness: 1.5,
+                            color: _isDark ? Colors.white38 : Colors.black54,
                           ),
                         ],
                       ),
                       actions: [
                         TextButton(
                           onPressed: () {
-                            otpGenerator.dispose(); // Cleanup resources
+                            otpGenerator.dispose();
                             Navigator.pop(context);
                           },
-                          child: const Text('Close'),
+                          child: Text(
+                            'Close',
+                            style: TextStyle(
+                              color: _isDark ? Colors.blueAccent : Colors.blue,
+                            ),
+                          ),
                         ),
                       ],
                     );
@@ -173,9 +256,8 @@ class _HomeState extends State<Home> {
       },
     );
 
-    otpGenerator.dispose(); // Cleanup resources when dialog is dismissed
+    otpGenerator.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {

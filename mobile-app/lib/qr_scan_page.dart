@@ -108,12 +108,21 @@ class _QRScanPageState extends State<QRScanPage> {
   }
 
   Future<void> _connectToBluetooth(String bluetoothAddress, String otp) async {
+    // Validate the Bluetooth address before proceeding
+    if (bluetoothAddress == "Unknown" || bluetoothAddress.isEmpty) {
+      setState(() {
+        message = "Invalid Bluetooth address in QR Code.";
+      });
+      return; // Stop further execution if the address is invalid
+    }
+
     try {
+      print("Connecting to Bluetooth address: $bluetoothAddress with OTP: $otp");
       setState(() {
         message = "Connecting to Bluetooth device...";
       });
 
-      bool isConnected = await bluetoothManager.connectToDevice(bluetoothAddress, otp);
+      bool isConnected = await bluetoothManager.connectAndSendOtp(bluetoothAddress, otp);
 
       setState(() {
         message = isConnected
@@ -121,11 +130,13 @@ class _QRScanPageState extends State<QRScanPage> {
             : "Failed to verify OTP.";
       });
     } catch (e) {
+      print("Error during Bluetooth connection: $e");
       setState(() {
         message = "Connection failed: $e";
       });
     }
   }
+
 
   // Builds a scanner overlay with a transparent scan box and transparent outer box size for a better view
   Widget _buildScannerOverlay(BuildContext context) {
