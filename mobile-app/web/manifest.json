@@ -1,11 +1,11 @@
 {
-    "name": "fyp_desktop_app",
-    "short_name": "fyp_desktop_app",
+    "name": "remote_control",
+    "short_name": "remote_control",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "fyp desktop app",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
