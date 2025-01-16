@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "remote_control" "\0"
+            VALUE "CompanyName", "MobControl" "\0"
+            VALUE "FileDescription", "MobControl" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "remote_control" "\0"
+            VALUE "InternalName", "MobControl" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "remote_control.exe" "\0"
-            VALUE "ProductName", "remote_control" "\0"
+            VALUE "OriginalFilename", "MobControl.exe" "\0"
+            VALUE "ProductName", "MobControl" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

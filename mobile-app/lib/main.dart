@@ -1,189 +1,141 @@
 import 'package:flutter/material.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'home.dart';
+import 'package:fyp_desktop_app/setting_page.dart';
+import 'package:fyp_desktop_app/connection_page.dart';
 
-
+// Entry point of the Flutter app
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
+// Root widget of the application
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mob Control',
-      // Disable the 'debug' tag
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(),
-      home: const RootPage(),
-    );
-  }
-}
-
-class RootPage extends StatefulWidget {
-  const RootPage({super.key});
-
-  @override
-  State<RootPage> createState() => _RootPageState();
-}
-
-class _RootPageState extends State<RootPage> with TickerProviderStateMixin  {
-  double _offsetX = 0.0; // Horizontal offset for image
-  double _offsetY = 0.0; // Vertical offset for image
-
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-
-  // Controller and animation for the breathing (pulsating) effect on "Tap to Enter"
-  late AnimationController _breathingController;
-  late Animation<double> _breathingAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize animation controller for picture and animation
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.5).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
-
-    // Start the initial scale animation after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _animationController.forward();
-    });
-
-  // Breathing animation for "Tap to Enter" and picture after the animation come out
-    _breathingController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _breathingAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(
-        parent: _breathingController,
-        curve: Curves.easeInOut,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF1E1E2E),
+        primaryColor: const Color(0xFF4E46E4),
       ),
+      home: MyHomePage(),
     );
-
-  // Listen to accelerometer events for tilting the image
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        _offsetX = event.x * 2.5; // Adjust horizontal movement sensitivity
-        _offsetY = event.y * 2.5; // Adjust vertical movement sensitivity
-      });
-    });
   }
+}
+
+// Main of the application------------------------------------------------------
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
 
   @override
-  void dispose() {
-    _animationController.dispose();
-    _breathingController.dispose();
-    super.dispose();
-  }
+  _MyHomePageState createState() => _MyHomePageState();
+}
 
-  void _navigateToNextPage(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const Home()),
-    );
-  }
+class _MyHomePageState extends State<MyHomePage> {
+  String _selectedItem = 'Connection';
+
+  // Define the pages for each sidebar item
+  final Map<String, Widget> _pages = {
+    'Connection': const ConnectionPage(), // Replace with your ConnectionPage
+    'Settings': const SettingsPage(),
+
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GestureDetector(
-        onTap: () => _navigateToNextPage(context),
-        child: Stack(
+      body: Row(
         children: [
-          // Background Color
-          Container(
-            color: Colors.black, // Background color to match the theme
-          ),
-          // Background Image with Tilt and Scale Animation
-          Positioned.fill(
-            child: Transform.translate(
-              offset: Offset(_offsetX, _offsetY),
-              child: AnimatedBuilder(
-                animation: Listenable.merge([_scaleAnimation, _breathingAnimation]),
-                builder: (context, child) {
-                  // If initial scale animation is completed, apply breathing effect
-                  final scale = _animationController.isCompleted
-                      ? (1.5 * _breathingAnimation.value)
-                      : _scaleAnimation.value;
-
-                  return Transform.scale(
-                    scale: scale,
-                    child: Image.asset(
-                      'images/controllerHomeImg.jpg',
-                      fit: BoxFit.contain,
+          // Sidebar Section
+          SizedBox(
+            width: 250, // Sidebar width must be finite
+            child: Container(
+              color: const Color.fromARGB(255, 13, 13, 23),
+              child: Column(
+                children: [
+                  const SizedBox(height: 50),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'Mob Control',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4E46E4),
+                      ),
                     ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // Centered Title
-          Positioned(
-            top: 125.0,
-            left: 0,
-            right: 0,
-            child: Text(
-              'Mob Control',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple,
-                shadows: [
-                  Shadow(
-                    offset: const Offset(3.0, 3.0),
-                    blurRadius: 4.0,
-                    color: Colors.purple.withOpacity(0.7),
+                  ),
+                  SidebarItem(
+                    title: 'Connection',
+                    selected: _selectedItem == 'Connection',
+                    onTap: () {
+                      setState(() => _selectedItem = 'Connection');
+                    },
+                  ),
+                  SidebarItem(
+                    title: 'Settings',
+                    selected: _selectedItem == 'Settings',
+                    onTap: () {
+                      setState(() => _selectedItem = 'Settings');
+                    },
                   ),
                 ],
               ),
             ),
           ),
-
-          // "Tap to Enter" with breathing animation
-          Positioned(
-            bottom: 50.0,
-            left: 20.0,
-            right: 20.0,
-            child: AnimatedBuilder(
-              animation: _breathingAnimation,
-              builder: (context, child) {
-                return Text(
-                  'Tap to Enter',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: _breathingAnimation.value * 24, // Animate font size with breathing
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        offset: const Offset(1.0, 1.0),
-                        blurRadius: 2.0,
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                    ],
-                  ),
-                );
-              },
+          // Main Content Section
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Container(
+                color: const Color(0xFF1E1E2E), // Ensure background is visible
+                child: _pages[_selectedItem] ?? const Text('Page not found'),
+              ),
             ),
           ),
         ],
-      ),
       ),
     );
   }
 }
 
+// Sidebar Item Widget--------------------------------------------------------------------------
+class SidebarItem extends StatelessWidget {
+  final String title;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const SidebarItem({
+    super.key,
+    required this.title,
+    this.selected = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Container(
+          decoration: selected
+              ? BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(8),
+                )
+              : null,
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            title: Text(
+              title,
+              style: TextStyle(
+                color: selected ? const Color(0xFF4E46E4) : Colors.white,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
